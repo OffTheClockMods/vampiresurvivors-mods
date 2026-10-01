@@ -1,0 +1,39 @@
+<Project>
+  <!-- Reproducible builds for every Vampire Survivors project in this folder (MSBuild imports this file automatically).
+       Same source -> byte-identical DLL, whatever folder or git commit it is built from:
+       - Deterministic: no timestamps / random MVIDs in the assembly.
+       - PathMap: the project folder is written as /_/ (PDB path and CallerFilePath), not the user folder
+       - No git data: the .NET 8 SDK otherwise appends "+<commit sha>" to the informational version and writes a
+         SourceLink map (repo URL + commit + local path) and untracked generated files into the PDB, whose ID the DLL
+         carries - so every new commit changed the DLL bytes.
+       Copied from Src\ on 2026-09-29; every Vampire Survivors DLL has been built this way from the start. -->
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+    <PathMap>$(MSBuildProjectDirectory)=/_/</PathMap>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <EnableSourceControlManagerQueries>false</EnableSourceControlManagerQueries>
+    <EnableSourceLink>false</EnableSourceLink>
+    <EmbedUntrackedSources>false</EmbedUntrackedSources>
+  </PropertyGroup>
+
+  <!-- Shared Off the Clock helpers (Src\otc_bepinex, README there), compiled into each plugin since 2026-09-30:
+       OtcPatcher/OtcPatch (fail-safe patching, throttled patch-body errors), OtcSelfCheck ([SELFCHECK] lines),
+       OtcOnline (online co-op guard; replaced the six VsOnline.cs copies), and for Gold and XP Multiplier only
+       OtcHost + OtcKeys + OtcNotice (its csproj references InputLegacyModule, IMGUIModule and TextRenderingModule).
+       The other plugins have no keys, no notice and no per-frame host (nothing extra compiled into them). -->
+  <!-- 2026-09-30 (wave 2): the plugins with hotkeys are listed here; their csproj references InputLegacyModule, IMGUIModule
+       and TextRenderingModule. Every other plugin still gets no keys, no notice and no host (unchanged output). -->
+  <PropertyGroup>
+    <OtcRuntime>IL2CPP</OtcRuntime>
+    <OtcKeyPlugins>;GoldAndXpMultiplier;TimeStopAndSkipMinute;AutoLevelUp;</OtcKeyPlugins>
+    <OtcKeys Condition="!$(OtcKeyPlugins.Contains(';$(MSBuildProjectName);'))">false</OtcKeys>
+    <OtcNotice Condition="!$(OtcKeyPlugins.Contains(';$(MSBuildProjectName);'))">false</OtcNotice>
+    <OtcGenerateHost Condition="!$(OtcKeyPlugins.Contains(';$(MSBuildProjectName);'))">false</OtcGenerateHost>
+  </PropertyGroup>
+  <Import Project="$(MSBuildThisFileDirectory)otc_bepinex\OtcBepInEx.props" />
+  <PropertyGroup>
+    <!-- The library files are linked from outside the project folder: map them too, or their CallerFilePath strings
+         (OtcPatch.Guard sites) would carry the user folder into the DLL. -->
+    <PathMap>$(MSBuildProjectDirectory)=/_/,$(OtcBepInExDir)=/_otc_bepinex/</PathMap>
+  </PropertyGroup>
+</Project>

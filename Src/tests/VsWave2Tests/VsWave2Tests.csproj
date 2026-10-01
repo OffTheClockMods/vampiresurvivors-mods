@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Offline tests for the Vampire Survivors wave 2 plugins (no game, no BepInEx start):
+         1. the pure logic of each mod (its Logic.cs is compiled in here as-is);
+         2. a patch-target check: every game method a plugin patches exists in the interop assemblies generated for
+            Vampire Survivors 1.16.107 (refs\vs-refs\interop), declared on that class, with the parameter names the
+            patch methods bind to (Harmony binds by name), plus the interop [CallerCount] of each target.
+       Run: dotnet run -c Release (from this folder; the plugins must be built first).
+       Break test: dotnet run -c Release -(-) break <ModName>   (a renamed game method + a wrong expectation; must FAIL). -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <RollForward>Major</RollForward>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\MovementSpeedControl\Logic.cs" Link="Logic\MovementSpeedControl.cs" />
+    <Compile Include="..\..\EnemyHealthAndDamage\Logic.cs" Link="Logic\EnemyHealthAndDamage.cs" />
+    <Compile Include="..\..\TimeStopAndSkipMinute\Logic.cs" Link="Logic\TimeStopAndSkipMinute.cs" />
+    <Compile Include="..\..\AutoLevelUp\Logic.cs" Link="Logic\AutoLevelUp.cs" />
+    <Compile Include="..\..\MoreStartingArcanas\Logic.cs" Link="Logic\MoreStartingArcanas.cs" />
+    <Compile Include="..\..\RebindKeys\Logic.cs" Link="Logic\RebindKeys.cs" />
+  </ItemGroup>
+</Project>

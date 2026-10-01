@@ -1,0 +1,7 @@
+<Project>
+  <!-- Stops MSBuild from importing ..\Directory.Build.props (the plugin settings + otc_bepinex sources) into the offline
+       test projects here. The tests compile only the mods' pure Logic.cs files and load the built plugin DLLs by reflection. -->
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+</Project>
